@@ -5,4 +5,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [vue()],
   base: '/', // 用户主页仓库用 /
+  server: {
+    port: 25555, // 修改为你想要的端口
+  },
 })
