@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { Engine } from '@babylonjs/core/Engines/engine'
+import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
+import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
+import { PointLight } from '@babylonjs/core/Lights/pointLight'
+import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import { Color3, Color4 } from '@babylonjs/core/Maths/math.color'
+import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import { Scene } from '@babylonjs/core/scene'
 
 const github = {
   name: 'HaoYang',
@@ -20,12 +29,11 @@ const projects = [
 const scrollY = ref(0)
 const pointer = ref({ x: 0, y: 0 })
 const activeSection = ref('home')
-
-const sceneStyle = computed(() => ({
-  '--scene-x': `${pointer.value.y * -8}deg`,
-  '--scene-y': `${pointer.value.x * 10}deg`,
-  '--scene-depth': `${Math.min(scrollY.value * 0.18, 120)}px`,
-}))
+const canvas = ref<HTMLCanvasElement | null>(null)
+let engine: Engine | null = null
+let babylonScene: Scene | null = null
+let camera: ArcRotateCamera | null = null
+let heroRoot: any = null
 
 function updateScroll() {
   scrollY.value = window.scrollY
@@ -43,19 +51,100 @@ function updatePointer(event: PointerEvent) {
   pointer.value = { x: event.clientX / window.innerWidth - 0.5, y: event.clientY / window.innerHeight - 0.5 }
 }
 
+function createBabylonScene() {
+  if (!canvas.value) return
+  engine = new Engine(canvas.value, true, { preserveDrawingBuffer: true, stencil: true, antialias: true })
+  babylonScene = new Scene(engine)
+  babylonScene.clearColor = new Color4(0.02, 0.025, 0.035, 0)
+  camera = new ArcRotateCamera('hero-camera', -Math.PI / 2, Math.PI / 2.4, 8.8, Vector3.Zero(), babylonScene)
+  camera.lowerRadiusLimit = 7
+  camera.upperRadiusLimit = 11
+  camera.inputs.clear()
+  new HemisphericLight('soft-fill', new Vector3(0, 1, 0), babylonScene).intensity = 0.55
+  const key = new PointLight('acid-key', new Vector3(3, 4, -4), babylonScene)
+  key.diffuse = new Color3(0.78, 1, 0.3)
+  key.intensity = 3.5
+  const cyan = new PointLight('cyan-rim', new Vector3(-4, 1, 2), babylonScene)
+  cyan.diffuse = new Color3(0.15, 0.8, 1)
+  cyan.intensity = 3
+
+  heroRoot = MeshBuilder.CreateBox('hero-root', { size: 0.01 }, babylonScene)
+  heroRoot.isVisible = false
+  const coreMat = new StandardMaterial('core-material', babylonScene)
+  coreMat.diffuseColor = new Color3(0.67, 0.95, 0.16)
+  coreMat.emissiveColor = new Color3(0.22, 0.65, 0.06)
+  coreMat.specularColor = new Color3(0.8, 1, 0.5)
+  const core = MeshBuilder.CreateIcoSphere('core', { radius: 1.15, subdivisions: 3 }, babylonScene)
+  core.material = coreMat
+  core.parent = heroRoot
+  const coreHalo = MeshBuilder.CreateIcoSphere('core-halo', { radius: 1.32, subdivisions: 2 }, babylonScene)
+  const haloMat = new StandardMaterial('halo-material', babylonScene)
+  haloMat.wireframe = true
+  haloMat.emissiveColor = new Color3(0.2, 0.8, 0.9)
+  haloMat.alpha = 0.38
+  coreHalo.material = haloMat
+  coreHalo.parent = heroRoot
+
+  const ringMat = new StandardMaterial('ring-material', babylonScene)
+  ringMat.emissiveColor = new Color3(0.55, 0.92, 0.95)
+  ringMat.diffuseColor = new Color3(0.1, 0.35, 0.42)
+  for (let i = 0; i < 3; i += 1) {
+    const ring = MeshBuilder.CreateTorus(`orbit-${i}`, { diameter: 3.2 + i * 0.65, thickness: 0.035 + i * 0.012, tessellation: 96 }, babylonScene)
+    ring.material = ringMat
+    ring.parent = heroRoot
+    ring.rotation.x = 0.78 + i * 0.37
+    ring.rotation.y = i * 0.7
+    ring.rotation.z = i * 0.35
+  }
+
+  const cubeMat = new StandardMaterial('cube-material', babylonScene)
+  cubeMat.emissiveColor = new Color3(0.58, 0.15, 0.95)
+  cubeMat.diffuseColor = new Color3(0.18, 0.05, 0.27)
+  for (let i = 0; i < 8; i += 1) {
+    const cube = MeshBuilder.CreateBox(`satellite-${i}`, { size: 0.18 + (i % 3) * 0.06 }, babylonScene)
+    const angle = (Math.PI * 2 * i) / 8
+    cube.position = new Vector3(Math.cos(angle) * (2.1 + (i % 2) * 0.45), (i % 3 - 1) * 0.48, Math.sin(angle) * (2.1 + (i % 2) * 0.45))
+    cube.material = cubeMat
+    cube.parent = heroRoot
+  }
+
+  const floorMat = new StandardMaterial('floor-material', babylonScene)
+  floorMat.wireframe = true
+  floorMat.emissiveColor = new Color3(0.12, 0.24, 0.28)
+  const grid = MeshBuilder.CreateGround('grid', { width: 12, height: 12, subdivisions: 18 }, babylonScene)
+  grid.material = floorMat
+  grid.position.y = -2.15
+  grid.rotation.y = Math.PI / 8
+
+  engine.runRenderLoop(() => {
+    if (!babylonScene || !heroRoot || !camera) return
+    const time = performance.now() * 0.00045
+    heroRoot.rotation.y += 0.0028
+    heroRoot.rotation.x = Math.sin(time * 1.4) * 0.08 + pointer.value.y * 0.24
+    heroRoot.position.y += ((Math.min(scrollY.value * 0.003, 0.65) + pointer.value.y * 0.15) - heroRoot.position.y) * 0.035
+    camera.alpha += ((-Math.PI / 2 + pointer.value.x * 0.48) - camera.alpha) * 0.035
+    camera.beta += ((Math.PI / 2.4 + pointer.value.y * 0.12) - camera.beta) * 0.035
+    babylonScene.render()
+  })
+}
+
 onMounted(() => {
   updateScroll()
+  createBabylonScene()
   window.addEventListener('scroll', updateScroll, { passive: true })
   window.addEventListener('pointermove', updatePointer, { passive: true })
+  window.addEventListener('resize', () => engine?.resize())
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('pointermove', updatePointer)
+  engine?.dispose()
+  babylonScene?.dispose()
 })
 </script>
 
 <template>
-  <div class="site-shell" :style="sceneStyle">
+  <div class="site-shell">
     <div class="noise" aria-hidden="true"></div>
     <header class="topbar">
       <a class="wordmark" href="#home" aria-label="回到首页">HY<span>/</span>24</a>
@@ -75,7 +164,7 @@ onUnmounted(() => {
           <div class="hero-actions"><a class="button button-solid" href="#work">看看我在做什么 <span>↓</span></a><a class="text-link" :href="github.url" target="_blank" rel="noreferrer">在 GitHub 上认识我 <span>↗</span></a></div>
           <div class="hero-meta"><span>SCROLL TO EXPLORE</span><span class="scroll-line"></span><span>01 / 03</span></div>
         </div>
-        <div class="scene-wrap" aria-label="三维头像展示"><div class="scene" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="axis axis-a"></div><div class="axis axis-b"></div><div class="avatar-card"><img :src="github.avatar" :alt="`${github.name} 的 GitHub 头像`" /><span class="avatar-corner corner-tl"></span><span class="avatar-corner corner-br"></span></div><div class="float-label label-top">BUILD / PLAY / REPEAT</div><div class="float-label label-side">31° 13' N<br />121° 28' E</div><div class="float-label label-bottom">FUSSYZHY <b>•</b> 47082730</div></div><div class="scene-caption"><span>FIG. 01</span><span>PERSONAL / IDENTITY</span></div></div>
+        <div class="scene-wrap" aria-label="Babylon.js 三维展示"><canvas ref="canvas" class="babylon-canvas"></canvas><div class="scene-ui"><span class="float-label label-top">BABYLON / WEBGL</span><span class="float-label label-side">REAL-TIME<br />GEOMETRY</span><span class="float-label label-bottom">FUSSYZHY <b>•</b> 47082730</span></div><div class="scene-caption"><span>FIG. 01</span><span>3D / PERSONAL IDENTITY</span></div></div>
       </section>
       <div class="ticker" aria-label="兴趣标签"><div class="ticker-track"><span>CREATIVE CODE</span><b>✦</b><span>PRODUCT THINKING</span><b>✦</b><span>OPEN SOURCE</span><b>✦</b><span>CREATIVE CODE</span><b>✦</b><span>PRODUCT THINKING</span><b>✦</b><span>OPEN SOURCE</span><b>✦</b></div></div>
       <section id="work" class="work-section section-block"><div class="section-intro"><p class="kicker">02 / SELECTED WORK</p><h2>把想法，<br /><em>做成可以触摸的东西。</em></h2><p>我喜欢从一个模糊的念头出发，直到它变成一个有温度的界面、一段顺滑的动效，或一个能被更多人使用的工具。</p></div><div class="project-list"><a v-for="project in projects" :key="project.number" class="project-card" :class="`tone-${project.tone}`" href="#about"><div class="project-top"><span>{{ project.number }}</span><span>{{ project.type }}</span></div><div class="project-main"><div><h3>{{ project.title }}</h3><p>{{ project.copy }}</p></div><span class="project-mark">{{ project.mark }}</span></div><div class="project-bottom"><span>EXPLORE CASE <b>↗</b></span><span class="project-bar"></span></div></a></div></section>
