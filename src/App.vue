@@ -1,25 +1,86 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-type Post = { title: string; excerpt: string; date: string; read: string; tag: string; color: string }
-const activeTag = ref('全部'); const search = ref(''); const email = ref(''); const subscribed = ref(false)
-const posts: Post[] = [
-  { title: '把复杂的事情讲简单，是一种能力', excerpt: '最近在做一个数据产品，重新思考了「清晰」这件事。好的设计不是增加更多，而是删掉不必要的选择。', date: '2024.06.18', read: '8 min read', tag: '思考', color: '#f2c14e' },
-  { title: '我的年度阅读清单：从输入到行动', excerpt: '记录过去一年真正影响过我的 12 本书，以及它们如何悄悄改变了我的工作方式。', date: '2024.05.26', read: '6 min read', tag: '生活', color: '#9ec5ab' },
-  { title: '一名前端开发者的工具箱', excerpt: '那些让我每天都更快一点、更专注一点的工具、习惯和工作流。', date: '2024.04.09', read: '10 min read', tag: '技术', color: '#d98e73' },
-  { title: '在城市里寻找一点松弛感', excerpt: '周末去了几个安静的地方，带着相机，也带着不赶时间的自己。', date: '2024.03.11', read: '4 min read', tag: '生活', color: '#9bb7d4' },
-  { title: '从 0 到 1 做一个个人网站', excerpt: '分享我的搭建过程、踩坑记录，以及为什么我最终选择了简单的方案。', date: '2024.02.02', read: '12 min read', tag: '技术', color: '#c4a7e7' },
-  { title: '写给正在迷茫的你', excerpt: '没有标准答案的时候，先去做一件具体的小事。', date: '2024.01.15', read: '5 min read', tag: '思考', color: '#e8a0bf' },
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+
+const github = {
+  name: 'HaoYang',
+  handle: 'Fussyzhy',
+  avatar: 'https://avatars.githubusercontent.com/u/47082730?v=4',
+  url: 'https://github.com/Fussyzhy',
+  location: 'Hangzhou, China',
+  repos: 15,
+  followers: 8,
+}
+
+const projects = [
+  { number: '01', title: 'Web experiments', type: 'INTERACTION / 2024', copy: '把好奇心变成可以被点击、拖拽和再次发现的小东西。', tone: 'cyan', mark: '↗' },
+  { number: '02', title: 'Open source notes', type: 'SYSTEM / 2023', copy: '在开源社区里记录问题、方案和那些意外的灵感。', tone: 'violet', mark: '⌘' },
+  { number: '03', title: 'Quiet interfaces', type: 'DESIGN / NOW', copy: '让复杂的工具变得清晰、友好，也保留一点个性。', tone: 'lime', mark: '✦' },
 ]
-const tags = ['全部', '思考', '技术', '生活']
-const filteredPosts = computed(() => posts.filter(post => { const matchTag = activeTag.value === '全部' || post.tag === activeTag.value; const q = search.value.trim().toLowerCase(); return matchTag && (!q || `${post.title}${post.excerpt}`.toLowerCase().includes(q)) }))
-function subscribe() { if (email.value.trim()) subscribed.value = true }
+
+const scrollY = ref(0)
+const pointer = ref({ x: 0, y: 0 })
+const activeSection = ref('home')
+
+const sceneStyle = computed(() => ({
+  '--scene-x': `${pointer.value.y * -8}deg`,
+  '--scene-y': `${pointer.value.x * 10}deg`,
+  '--scene-depth': `${Math.min(scrollY.value * 0.18, 120)}px`,
+}))
+
+function updateScroll() {
+  scrollY.value = window.scrollY
+  const sections = ['home', 'work', 'about']
+  const current = sections.find((id) => {
+    const el = document.getElementById(id)
+    if (!el) return false
+    const box = el.getBoundingClientRect()
+    return box.top <= 140 && box.bottom > 140
+  })
+  if (current) activeSection.value = current
+}
+
+function updatePointer(event: PointerEvent) {
+  pointer.value = { x: event.clientX / window.innerWidth - 0.5, y: event.clientY / window.innerHeight - 0.5 }
+}
+
+onMounted(() => {
+  updateScroll()
+  window.addEventListener('scroll', updateScroll, { passive: true })
+  window.addEventListener('pointermove', updatePointer, { passive: true })
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScroll)
+  window.removeEventListener('pointermove', updatePointer)
+})
 </script>
 
 <template>
-  <div class="page-shell"><header class="topbar"><a class="brand" href="#top">HJ<span>.</span></a><nav><a href="#articles">文章</a><a href="#about">关于我</a><a href="#now">订阅</a></nav><a class="contact" href="https://github.com/Fussyzhy" target="_blank" rel="noreferrer">GitHub <span>↗</span></a></header>
-    <main id="top"><section class="hero" id="about"><div class="hero-copy"><p class="eyebrow">你好，我是韩江 <span>👋</span></p><h1>记录思考，<br /><em>分享成长。</em></h1><p class="intro">一名独立开发者和设计爱好者。这里记录我的所见、所学，以及那些值得反复思考的小事。</p><a class="primary-btn" href="#articles">阅读我的文章 <span>↓</span></a></div><div class="portrait"><div class="portrait-bg"></div><div class="portrait-card"><span class="sun">✦</span><span class="scribble">stay curious</span></div></div></section>
-      <section class="featured"><div class="section-label">精选文章 <span>FEATURED</span></div><article class="feature-card"><div class="feature-art"><div class="art-circle"></div><div class="art-text">MAKE<br />ROOM<br /><small>FOR IDEAS</small></div></div><div class="feature-body"><div class="meta"><span class="tag">思考</span><span>2024.06.18&nbsp; · &nbsp;8 min read</span></div><h2>把复杂的事情讲简单，是一种能力</h2><p>最近在做一个数据产品，重新思考了「清晰」这件事。好的设计不是增加更多，而是删掉不必要的选择。</p><a class="read-link" href="#articles">阅读全文 <span>→</span></a></div></article></section>
-      <section class="articles" id="articles"><div class="articles-head"><div><div class="section-label">全部文章 <span>ARCHIVE</span></div><h2>最近的记录</h2></div><div class="tools"><input v-model="search" aria-label="搜索文章" placeholder="搜索文章..." /><div class="filters"><button v-for="tag in tags" :key="tag" :class="{ active: activeTag === tag }" @click="activeTag = tag">{{ tag }}</button></div></div></div><div class="post-grid"><article v-for="post in filteredPosts" :key="post.title" class="post-card"><div class="post-image" :style="{ background: post.color }"><span>{{ post.tag }}</span><b>✳</b></div><div class="post-content"><div class="post-meta">{{ post.date }} <i>·</i> {{ post.read }}</div><h3>{{ post.title }}</h3><p>{{ post.excerpt }}</p><a class="read-link" href="#top">阅读更多 <span>→</span></a></div></article></div><p v-if="!filteredPosts.length" class="empty">没有找到相关文章，换个关键词试试。</p></section>
-      <section class="newsletter" id="now"><div><div class="section-label">订阅通讯 <span>NEWSLETTER</span></div><h2>把新文章寄给你。</h2><p>不定期更新，关于设计、技术和生活的思考。保持联系，但不打扰。</p></div><form @submit.prevent="subscribe"><div class="input-wrap"><input v-model="email" type="email" required placeholder="你的邮箱地址" /><button aria-label="订阅">→</button></div><small v-if="subscribed" class="success">订阅成功，感谢你的关注！</small><small v-else>我们尊重你的收件箱，随时可以退订。</small></form></section></main>
-    <footer><span>© 2026 韩江</span><span>Built with curiosity &amp; coffee</span><div><a href="https://github.com/Fussyzhy" target="_blank" rel="noreferrer">GitHub</a><a href="#top">返回顶部</a></div></footer></div>
+  <div class="site-shell" :style="sceneStyle">
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="wordmark" href="#home" aria-label="回到首页">HY<span>/</span>24</a>
+      <nav aria-label="主导航">
+        <a href="#home" :class="{ active: activeSection === 'home' }">首页</a>
+        <a href="#work" :class="{ active: activeSection === 'work' }">作品</a>
+        <a href="#about" :class="{ active: activeSection === 'about' }">关于</a>
+      </nav>
+      <a class="github-link" :href="github.url" target="_blank" rel="noreferrer"><span class="github-dot"></span> GitHub <span class="arrow">↗</span></a>
+    </header>
+    <main>
+      <section id="home" class="hero-section">
+        <div class="hero-copy">
+          <p class="kicker"><span class="pulse-dot"></span> Independent maker · 2024—now</p>
+          <h1><span class="greeting">你好，我是</span><br /><span>HaoYang</span><i>.</i></h1>
+          <p class="hero-lead">我在杭州做一些有趣的数字体验，写代码，也研究人与界面之间那些微妙的距离。</p>
+          <div class="hero-actions"><a class="button button-solid" href="#work">看看我在做什么 <span>↓</span></a><a class="text-link" :href="github.url" target="_blank" rel="noreferrer">在 GitHub 上认识我 <span>↗</span></a></div>
+          <div class="hero-meta"><span>SCROLL TO EXPLORE</span><span class="scroll-line"></span><span>01 / 03</span></div>
+        </div>
+        <div class="scene-wrap" aria-label="三维头像展示"><div class="scene" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="axis axis-a"></div><div class="axis axis-b"></div><div class="avatar-card"><img :src="github.avatar" :alt="`${github.name} 的 GitHub 头像`" /><span class="avatar-corner corner-tl"></span><span class="avatar-corner corner-br"></span></div><div class="float-label label-top">BUILD / PLAY / REPEAT</div><div class="float-label label-side">31° 13' N<br />121° 28' E</div><div class="float-label label-bottom">FUSSYZHY <b>•</b> 47082730</div></div><div class="scene-caption"><span>FIG. 01</span><span>PERSONAL / IDENTITY</span></div></div>
+      </section>
+      <div class="ticker" aria-label="兴趣标签"><div class="ticker-track"><span>CREATIVE CODE</span><b>✦</b><span>PRODUCT THINKING</span><b>✦</b><span>OPEN SOURCE</span><b>✦</b><span>CREATIVE CODE</span><b>✦</b><span>PRODUCT THINKING</span><b>✦</b><span>OPEN SOURCE</span><b>✦</b></div></div>
+      <section id="work" class="work-section section-block"><div class="section-intro"><p class="kicker">02 / SELECTED WORK</p><h2>把想法，<br /><em>做成可以触摸的东西。</em></h2><p>我喜欢从一个模糊的念头出发，直到它变成一个有温度的界面、一段顺滑的动效，或一个能被更多人使用的工具。</p></div><div class="project-list"><a v-for="project in projects" :key="project.number" class="project-card" :class="`tone-${project.tone}`" href="#about"><div class="project-top"><span>{{ project.number }}</span><span>{{ project.type }}</span></div><div class="project-main"><div><h3>{{ project.title }}</h3><p>{{ project.copy }}</p></div><span class="project-mark">{{ project.mark }}</span></div><div class="project-bottom"><span>EXPLORE CASE <b>↗</b></span><span class="project-bar"></span></div></a></div></section>
+      <section id="about" class="about-section section-block"><div class="about-portrait"><img :src="github.avatar" :alt="github.name" /><div class="portrait-stamp">H / Y<br /><small>MAKER<br />IN RESIDENCE</small></div></div><div class="about-copy"><p class="kicker">03 / A LITTLE ABOUT ME</p><h2>保持好奇，<br /><em>保持在场。</em></h2><p>我的工作横跨前端、交互和视觉设计。我相信好的技术应该让人忘记技术本身，只留下“这很顺手”的感觉。</p><p>工作之外，我会在城市里散步、拍照，或者打开一个新仓库，把脑子里的小问题慢慢做出来。</p><a class="button button-outline" :href="github.url" target="_blank" rel="noreferrer">查看我的 GitHub <span>↗</span></a></div><div class="stats"><div><strong>{{ github.repos }}</strong><span>PUBLIC REPOS</span></div><div><strong>{{ github.followers }}</strong><span>FOLLOWERS</span></div><div><strong>∞</strong><span>IDEAS IN PROGRESS</span></div></div></section>
+    </main>
+    <footer><div><span class="footer-mark">HY/24</span><span>© 2024 HaoYang</span></div><span>DESIGNED &amp; BUILT IN HANGZHOU</span><a :href="github.url" target="_blank" rel="noreferrer">GITHUB ↗</a></footer>
+  </div>
 </template>
