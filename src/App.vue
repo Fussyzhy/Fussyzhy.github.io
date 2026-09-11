@@ -5,7 +5,9 @@ import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
 import { PointLight } from '@babylonjs/core/Lights/pointLight'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import { Texture } from '@babylonjs/core/Materials/Textures/texture'
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Scene } from '@babylonjs/core/scene'
@@ -34,6 +36,7 @@ let engine: Engine | null = null
 let babylonScene: Scene | null = null
 let camera: ArcRotateCamera | null = null
 let heroRoot: any = null
+let sceneResize = () => engine?.resize()
 
 function updateScroll() {
   scrollY.value = window.scrollY
@@ -53,10 +56,10 @@ function updatePointer(event: PointerEvent) {
 
 function createBabylonScene() {
   if (!canvas.value) return
-  engine = new Engine(canvas.value, true, { preserveDrawingBuffer: true, stencil: true, antialias: true })
+  engine = new Engine(canvas.value, true, { preserveDrawingBuffer: true, stencil: true, antialias: true, alpha: true })
   babylonScene = new Scene(engine)
-  babylonScene.clearColor = new Color4(0.02, 0.025, 0.035, 0)
-  camera = new ArcRotateCamera('hero-camera', -Math.PI / 2, Math.PI / 2.4, 8.8, Vector3.Zero(), babylonScene)
+  babylonScene.clearColor = new Color4(0, 0, 0, 0)
+  camera = new ArcRotateCamera('hero-camera', -Math.PI / 2, Math.PI / 2.35, 8.6, Vector3.Zero(), babylonScene)
   camera.lowerRadiusLimit = 7
   camera.upperRadiusLimit = 11
   camera.inputs.clear()
@@ -71,13 +74,24 @@ function createBabylonScene() {
   heroRoot = MeshBuilder.CreateBox('hero-root', { size: 0.01 }, babylonScene)
   heroRoot.isVisible = false
   const coreMat = new StandardMaterial('core-material', babylonScene)
-  coreMat.diffuseColor = new Color3(0.67, 0.95, 0.16)
-  coreMat.emissiveColor = new Color3(0.22, 0.65, 0.06)
+  coreMat.diffuseColor = new Color3(0.45, 0.8, 0.18)
+  coreMat.emissiveColor = new Color3(0.1, 0.34, 0.04)
   coreMat.specularColor = new Color3(0.8, 1, 0.5)
-  const core = MeshBuilder.CreateIcoSphere('core', { radius: 1.15, subdivisions: 3 }, babylonScene)
+  const core = MeshBuilder.CreateIcoSphere('core', { radius: 1.2, subdivisions: 3 }, babylonScene)
   core.material = coreMat
   core.parent = heroRoot
-  const coreHalo = MeshBuilder.CreateIcoSphere('core-halo', { radius: 1.32, subdivisions: 2 }, babylonScene)
+
+  const portrait = MeshBuilder.CreatePlane('portrait', { width: 1.78, height: 2.05 }, babylonScene)
+  const portraitMat = new StandardMaterial('portrait-material', babylonScene)
+  portraitMat.diffuseTexture = new Texture(github.avatar, babylonScene, true, false)
+  portraitMat.emissiveColor = new Color3(0.28, 0.28, 0.28)
+  portraitMat.specularColor = new Color3(0.1, 0.1, 0.1)
+  portrait.position = new Vector3(-1.28, -0.22, 0.22)
+  portrait.billboardMode = Mesh.BILLBOARDMODE_ALL
+  portrait.scaling.setAll(0.72)
+  portrait.parent = heroRoot
+
+  const coreHalo = MeshBuilder.CreateIcoSphere('core-halo', { radius: 1.36, subdivisions: 2 }, babylonScene)
   const haloMat = new StandardMaterial('halo-material', babylonScene)
   haloMat.wireframe = true
   haloMat.emissiveColor = new Color3(0.2, 0.8, 0.9)
@@ -88,42 +102,40 @@ function createBabylonScene() {
   const ringMat = new StandardMaterial('ring-material', babylonScene)
   ringMat.emissiveColor = new Color3(0.55, 0.92, 0.95)
   ringMat.diffuseColor = new Color3(0.1, 0.35, 0.42)
-  for (let i = 0; i < 3; i += 1) {
-    const ring = MeshBuilder.CreateTorus(`orbit-${i}`, { diameter: 3.2 + i * 0.65, thickness: 0.035 + i * 0.012, tessellation: 96 }, babylonScene)
+  for (let i = 0; i < 2; i += 1) {
+    const ring = MeshBuilder.CreateTorus(`orbit-${i}`, { diameter: 3.1 + i * 0.7, thickness: 0.028 + i * 0.012, tessellation: 96 }, babylonScene)
     ring.material = ringMat
     ring.parent = heroRoot
-    ring.rotation.x = 0.78 + i * 0.37
-    ring.rotation.y = i * 0.7
-    ring.rotation.z = i * 0.35
+    ring.rotation.x = 0.82 + i * 0.45
+    ring.rotation.y = i * 0.8
+    ring.rotation.z = i * 0.42
   }
 
-  const cubeMat = new StandardMaterial('cube-material', babylonScene)
-  cubeMat.emissiveColor = new Color3(0.58, 0.15, 0.95)
-  cubeMat.diffuseColor = new Color3(0.18, 0.05, 0.27)
-  for (let i = 0; i < 8; i += 1) {
-    const cube = MeshBuilder.CreateBox(`satellite-${i}`, { size: 0.18 + (i % 3) * 0.06 }, babylonScene)
-    const angle = (Math.PI * 2 * i) / 8
-    cube.position = new Vector3(Math.cos(angle) * (2.1 + (i % 2) * 0.45), (i % 3 - 1) * 0.48, Math.sin(angle) * (2.1 + (i % 2) * 0.45))
-    cube.material = cubeMat
-    cube.parent = heroRoot
+  const particleMat = new StandardMaterial('particle-material', babylonScene)
+  particleMat.emissiveColor = new Color3(0.78, 0.95, 0.28)
+  particleMat.diffuseColor = new Color3(0.2, 0.3, 0.08)
+  for (let i = 0; i < 28; i += 1) {
+    const particle = MeshBuilder.CreateIcoSphere(`particle-${i}`, { radius: i % 4 === 0 ? 0.05 : 0.025, subdivisions: 1 }, babylonScene)
+    const angle = (Math.PI * 2 * i) / 28
+    const radius = 2.05 + (i % 5) * 0.18
+    particle.position = new Vector3(Math.cos(angle) * radius, Math.sin(angle * 1.8) * 1.35, Math.sin(angle) * radius)
+    particle.material = particleMat
+    particle.parent = heroRoot
   }
-
-  const floorMat = new StandardMaterial('floor-material', babylonScene)
-  floorMat.wireframe = true
-  floorMat.emissiveColor = new Color3(0.12, 0.24, 0.28)
-  const grid = MeshBuilder.CreateGround('grid', { width: 12, height: 12, subdivisions: 18 }, babylonScene)
-  grid.material = floorMat
-  grid.position.y = -2.15
-  grid.rotation.y = Math.PI / 8
 
   engine.runRenderLoop(() => {
     if (!babylonScene || !heroRoot || !camera) return
     const time = performance.now() * 0.00045
-    heroRoot.rotation.y += 0.0028
-    heroRoot.rotation.x = Math.sin(time * 1.4) * 0.08 + pointer.value.y * 0.24
-    heroRoot.position.y += ((Math.min(scrollY.value * 0.003, 0.65) + pointer.value.y * 0.15) - heroRoot.position.y) * 0.035
+    const heroHeight = document.getElementById('home')?.getBoundingClientRect().height || window.innerHeight
+    const progress = Math.min(scrollY.value / Math.max(heroHeight * 0.9, 1), 1)
+    heroRoot.rotation.y += 0.0018
+    heroRoot.rotation.x = Math.sin(time * 1.1) * 0.055 + pointer.value.y * 0.16
+    heroRoot.position.x += ((progress * -0.85 + pointer.value.x * 0.12) - heroRoot.position.x) * 0.035
+    heroRoot.position.y += ((progress * 0.55 + pointer.value.y * 0.12) - heroRoot.position.y) * 0.035
+    heroRoot.scaling.setAll(1 - progress * 0.22)
     camera.alpha += ((-Math.PI / 2 + pointer.value.x * 0.48) - camera.alpha) * 0.035
-    camera.beta += ((Math.PI / 2.4 + pointer.value.y * 0.12) - camera.beta) * 0.035
+    camera.beta += ((Math.PI / 2.35 + pointer.value.y * 0.1 + progress * 0.08) - camera.beta) * 0.035
+    camera.radius += ((8.6 + progress * 1.2) - camera.radius) * 0.035
     babylonScene.render()
   })
 }
@@ -133,11 +145,13 @@ onMounted(() => {
   createBabylonScene()
   window.addEventListener('scroll', updateScroll, { passive: true })
   window.addEventListener('pointermove', updatePointer, { passive: true })
-  window.addEventListener('resize', () => engine?.resize())
+  sceneResize = () => engine?.resize()
+  window.addEventListener('resize', sceneResize)
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('pointermove', updatePointer)
+  window.removeEventListener('resize', sceneResize)
   engine?.dispose()
   babylonScene?.dispose()
 })
