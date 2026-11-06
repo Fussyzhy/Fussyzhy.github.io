@@ -1,0 +1,330 @@
+export type Category = 'desktop' | 'web' | 'game' | 'localization' | 'lab'
+
+export interface Project {
+  id: string
+  name: string
+  cn: string
+  blurb: string
+  category: Category
+  year: string
+  language: string | null
+  stars: number
+  fork: boolean
+  tags: string[]
+  featured?: boolean
+  url: string
+}
+
+export const categoryLabels: Record<Category, string> = {
+  desktop: '桌面应用',
+  web: 'Web / 全栈',
+  game: '游戏',
+  localization: '汉化 / 移植',
+  lab: '实验 / 记录',
+}
+
+export const categoryOrder: Category[] = ['desktop', 'web', 'game', 'localization', 'lab']
+
+export const profile = {
+  name: '昊阳',
+  latin: 'HaoYang',
+  handle: 'Fussyzhy',
+  role: '全栈开发者',
+  location: '杭州，中国',
+  email: '2233832509@qq.com',
+  github: 'https://github.com/Fussyzhy',
+  since: 2019,
+  repos: 20,
+  followers: 9,
+  avatar: '/avatar.jpg',
+  intro:
+    '正在成长中的全栈开发者。主要关注前端工程化、Node.js 后端开发和 Web 应用体验，喜欢把想法做成能真正运行的产品。',
+}
+
+export const stats = [
+  { value: 20, label: '公开仓库', en: 'PUBLIC REPOS', animate: true },
+  { value: 9, label: '关注者', en: 'FOLLOWERS', animate: true },
+  { value: 2019, label: '始于', en: 'ON GITHUB SINCE', animate: false },
+  { value: 5, label: '项目类型', en: 'CATEGORIES', animate: true },
+]
+
+export const stack = [
+  {
+    group: '前端',
+    en: 'FRONTEND',
+    items: ['Vue 3', 'React', 'TypeScript', 'JavaScript', 'HTML / CSS'],
+  },
+  {
+    group: '后端与数据',
+    en: 'BACKEND',
+    items: ['Node.js', 'NestJS', 'Express', 'Java', 'MySQL', 'MongoDB', 'Redis'],
+  },
+  {
+    group: '工具与引擎',
+    en: 'TOOLING',
+    items: ['Electron', 'Cocos Creator', 'Vite', 'Git', 'VS Code'],
+  },
+]
+
+export const timeline = [
+  { year: '2019', title: '注册 GitHub', copy: '把练习、笔记和小实验放进版本历史，开始长期记录。' },
+  { year: '2024', title: '用 Cocos Creator 做游戏', copy: '飞机大战、点点飞机，以及第一次参与 1024 创作节。' },
+  { year: '2025', title: '搭起个人博客', copy: 'Vue 3 + Element Plus 的前端，NestJS 写的后端。' },
+  { year: '2026', title: '桌面工具与游戏汉化', copy: 'MineFlux、PDF Squeezer、OcrLens，以及 Balatro 的中文补丁。' },
+]
+
+const seeds: Omit<Project, 'url'>[] = [
+  {
+    id: 'Balatro3DS-zh',
+    name: 'Balatro3DS-zh',
+    cn: 'Balatro 3DS 汉化',
+    blurb: '把 Balatro 搬进 Nintendo 3DS 的中文补丁：字库、排版与界面本地化，目前在 GitHub 上拿到最多 star 的作品。',
+    category: 'localization',
+    year: '2026',
+    language: 'Lua',
+    stars: 14,
+    fork: true,
+    tags: ['Lua', '3DS', '汉化'],
+    featured: true,
+  },
+  {
+    id: 'MineFlux',
+    name: 'MineFlux',
+    cn: '我的世界下载器',
+    blurb: '基于 Electron、React 与 TypeScript 的 Minecraft 下载工具：原版、模组加载器与整合包，支持并发下载、文件校验和断点续传。',
+    category: 'desktop',
+    year: '2026',
+    language: 'TypeScript',
+    stars: 3,
+    fork: false,
+    tags: ['Electron', 'React', 'TypeScript'],
+    featured: true,
+  },
+  {
+    id: 'Pdf-Squeezer',
+    name: 'Pdf-Squeezer',
+    cn: 'PDF 工作流',
+    blurb: '本地优先的 PDF 桌面应用，把压缩、合并、拆分这些高频动作收进一个安静的窗口。',
+    category: 'desktop',
+    year: '2026',
+    language: 'Electron',
+    stars: 3,
+    fork: false,
+    tags: ['Electron', 'PDF', '本地优先'],
+    featured: true,
+  },
+  {
+    id: 'OcrLens',
+    name: 'OcrLens',
+    cn: '代码审查镜',
+    blurb: '给 open-code-review（ocr）CLI 做的可视化桌面客户端：Windows、Electron 44、Vue 3.5。',
+    category: 'desktop',
+    year: '2026',
+    language: 'TypeScript',
+    stars: 2,
+    fork: false,
+    tags: ['Electron', 'Vue 3', 'CLI 可视化'],
+    featured: true,
+  },
+  {
+    id: 'Plane_Fight',
+    name: 'Plane_Fight',
+    cn: '飞机大战',
+    blurb: '用 Cocos Creator 做的 2D 飞机射击游戏：触控操作、多种敌机、血量与计分。',
+    category: 'game',
+    year: '2024',
+    language: 'TypeScript',
+    stars: 4,
+    fork: false,
+    tags: ['Cocos Creator', '2D 游戏'],
+    featured: true,
+  },
+  {
+    id: 'SyncMean',
+    name: 'SyncMean',
+    cn: '同声传意 · 联机版',
+    blurb: '两个人各自想一个词，同时喊出；不一样就基于这两个词继续联想，直到说出同一个词。',
+    category: 'web',
+    year: '2026',
+    language: 'TypeScript',
+    stars: 0,
+    fork: false,
+    tags: ['Vue 3', '实时联机'],
+    featured: true,
+  },
+  {
+    id: 'Harness-Desktop',
+    name: 'Harness-Desktop',
+    cn: 'Harness 桌面版',
+    blurb: '把 DeepSeek Harness 装进桌面应用，不用配 Node.js、不用敲命令，开箱即用。',
+    category: 'desktop',
+    year: '2026',
+    language: 'TypeScript',
+    stars: 1,
+    fork: false,
+    tags: ['Electron', '桌面封装'],
+  },
+  {
+    id: 'PersonalBlog_front',
+    name: 'PersonalBlog_front',
+    cn: '个人博客 · 前端',
+    blurb: 'Vue 3 + Element Plus 的博客前端：文章展示、登录注册、作品集。',
+    category: 'web',
+    year: '2025',
+    language: 'Vue',
+    stars: 1,
+    fork: false,
+    tags: ['Vue 3', 'Element Plus'],
+  },
+  {
+    id: 'PersonalBlog_server',
+    name: 'PersonalBlog_server',
+    cn: '个人博客 · 后端',
+    blurb: '博客系统的服务端：接口设计、鉴权与数据层。',
+    category: 'web',
+    year: '2025',
+    language: 'TypeScript',
+    stars: 1,
+    fork: false,
+    tags: ['NestJS', 'TypeScript'],
+  },
+  {
+    id: 'Polevent',
+    name: 'Polevent',
+    cn: '活动事件管理',
+    blurb: '面向大型活动的事件管理系统，从规划、组织到执行。',
+    category: 'web',
+    year: '2024',
+    language: 'Vue',
+    stars: 0,
+    fork: false,
+    tags: ['Vue 3', '管理系统'],
+  },
+  {
+    id: 'Fussyzhy.github.io',
+    name: 'Fussyzhy.github.io',
+    cn: '这个网站',
+    blurb: '你现在正在看的个人网站：Vue 3 + Vite 手写，GitHub Pages 自动部署。',
+    category: 'web',
+    year: '2026',
+    language: 'Vue',
+    stars: 0,
+    fork: false,
+    tags: ['Vue 3', 'Vite', 'GitHub Pages'],
+  },
+  {
+    id: 'avocado-shopping',
+    name: 'avocado-shopping',
+    cn: '牛油果商城',
+    blurb: 'Vue 2 移动端电商练习：商品浏览、购物车与下单流程。',
+    category: 'web',
+    year: '2024',
+    language: 'Vue',
+    stars: 0,
+    fork: false,
+    tags: ['Vue 2', '移动端'],
+  },
+  {
+    id: 'TappyPlane',
+    name: 'TappyPlane',
+    cn: '点点飞机',
+    blurb: 'Flappy Bird 玩法的休闲飞行游戏：点击上升、躲开管道、收集星星，Cocos Creator 3.8.2。',
+    category: 'game',
+    year: '2025',
+    language: 'TypeScript',
+    stars: 1,
+    fork: false,
+    tags: ['Cocos Creator', '休闲游戏'],
+  },
+  {
+    id: 'BalatroGBA-zh',
+    name: 'BalatroGBA-zh',
+    cn: 'Balatro GBA 汉化增强',
+    blurb: '基于 GBALATRO 的中文本地化增强版，为 GBA 上的 Balatro 补齐中文支持与体验优化。',
+    category: 'localization',
+    year: '2026',
+    language: 'C',
+    stars: 0,
+    fork: true,
+    tags: ['GBA', '汉化'],
+  },
+  {
+    id: 'mediastorm-club-checkin',
+    name: 'mediastorm-club-checkin',
+    cn: '影视飓风 Club 自动签到',
+    blurb: '影视飓风 Club 微信小程序的自动签到脚本。',
+    category: 'localization',
+    year: '2026',
+    language: 'JavaScript',
+    stars: 0,
+    fork: true,
+    tags: ['微信小程序', '脚本'],
+  },
+  {
+    id: 'Claw-beeper',
+    name: 'Claw-beeper',
+    cn: 'Claw Beeper CLI',
+    blurb: 'Claw Beeper 手机语音转写服务的本地命令行工具。',
+    category: 'lab',
+    year: '2026',
+    language: 'HTML',
+    stars: 1,
+    fork: false,
+    tags: ['CLI', '语音转写'],
+  },
+  {
+    id: '1024',
+    name: '1024',
+    cn: '七牛云 1024 创作节',
+    blurb: '七牛云 1024 创作节的项目代码仓库。',
+    category: 'lab',
+    year: '2024',
+    language: null,
+    stars: 1,
+    fork: true,
+    tags: ['活动项目'],
+  },
+  {
+    id: 'front',
+    name: 'front',
+    cn: '前端练习仓库',
+    blurb: '前端练手与组件试验的集合。',
+    category: 'lab',
+    year: '2024',
+    language: 'Vue',
+    stars: 1,
+    fork: true,
+    tags: ['练习'],
+  },
+  {
+    id: 'rea-fork',
+    name: 'rea-fork',
+    cn: 'REA',
+    blurb: '用 agent 逆向分析任何东西：从应用行为一直到原生二进制。',
+    category: 'lab',
+    year: '2026',
+    language: 'TypeScript',
+    stars: 0,
+    fork: true,
+    tags: ['Agent', '逆向工程'],
+  },
+  {
+    id: 'Fussyzhy',
+    name: 'Fussyzhy',
+    cn: 'GitHub 主页',
+    blurb: 'GitHub Profile 仓库：关于我、技术栈，以及正在关注的方向。',
+    category: 'lab',
+    year: '2025',
+    language: null,
+    stars: 2,
+    fork: false,
+    tags: ['Profile'],
+  },
+]
+
+export const projects: Project[] = seeds.map((project) => ({
+  ...project,
+  url: `https://github.com/Fussyzhy/${project.id}`,
+}))
+
+export const featured = projects.filter((project) => project.featured)

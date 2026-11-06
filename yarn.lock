@@ -27,11 +27,6 @@
     "@babel/helper-string-parser" "^7.29.7"
     "@babel/helper-validator-identifier" "^7.29.7"
 
-"@babylonjs/core@^9.26.0":
-  version "9.26.0"
-  resolved "https://registry.npmjs.org/@babylonjs/core/-/core-9.26.0.tgz"
-  integrity sha512-YJe7Zh9vj6Wg8NawJoAycoGFFhuzW9KLZykNm2nvlNrs2P43HTMv3SvgbfwHKkDpHcga4crdyVNlSf055LLkXg==
-
 "@jridgewell/sourcemap-codec@^1.5.5":
   version "1.6.0"
   resolved "https://registry.npmmirror.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.6.0.tgz"
