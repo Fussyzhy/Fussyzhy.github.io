@@ -1,31 +1,35 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('hy-theme')
+          document.documentElement.dataset.theme = stored === 'light' ? 'light' : 'dark'
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark'
+        }
+      })()
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f1eee7" />
+    <meta name="theme-color" content="#111114" />
     <meta
       name="description"
       content="昊阳 HaoYang / Fussyzhy — 全栈开发者，杭州。Vue、TypeScript、Node.js、NestJS，做 Web 应用、桌面工具和游戏汉化。"
     />
     <meta name="author" content="HaoYang" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="昊阳 HaoYang — 全栈开发者" />
+    <meta property="og:title" content="昊阳的小站 · HaoYang" />
     <meta
       property="og:description"
-      content="Vue、TypeScript、Node.js、NestJS。做 Web 应用、桌面工具和游戏汉化，目前在杭州。"
+      content="全栈开发者。把想法做成能真正运行的产品——从 Vue 界面、Node.js 服务，到装进你电脑的桌面应用。"
     />
-    <link rel="preload" href="/fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link
-      rel="preload"
-      href="/fonts/instrument-serif-400-italic.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link rel="preload" href="/fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
-    <title>昊阳 HaoYang — 全栈开发者</title>
+    <link rel="preload" href="/fonts/dmsans.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/noto-serif-sc.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
+    <title>昊阳的小站 · HaoYang</title>
   </head>
   <body>
     <div id="app"></div>

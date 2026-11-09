@@ -41,13 +41,6 @@ export const profile = {
     '正在成长中的全栈开发者。主要关注前端工程化、Node.js 后端开发和 Web 应用体验，喜欢把想法做成能真正运行的产品。',
 }
 
-export const stats = [
-  { value: 20, label: '公开仓库', en: 'PUBLIC REPOS', animate: true },
-  { value: 9, label: '关注者', en: 'FOLLOWERS', animate: true },
-  { value: 2019, label: '始于', en: 'ON GITHUB SINCE', animate: false },
-  { value: 5, label: '项目类型', en: 'CATEGORIES', animate: true },
-]
-
 export const stack = [
   {
     group: '前端',
